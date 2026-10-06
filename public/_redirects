@@ -1,0 +1,14 @@
+# Cerradura real del producto: Netlify sólo entrega estas rutas a sesiones con rol buyer.
+# Cada ruta tiene su regla de rol y, debajo, su fallback hacia el login (401).
+
+/portal.html     /portal.html          200!  Role=buyer
+/portal.html     /login.html           401!
+
+/portal          /portal.html          200!  Role=buyer
+/portal          /login.html           401!
+
+/portal/         /portal.html          200!  Role=buyer
+/portal/         /login.html           401!
+
+/descargas/*     /descargas/:splat     200!  Role=buyer
+/descargas/*     /login.html           401!

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Portal · Pequeños Artistas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="contenedor">
+    <header class="barra">
+      <a class="marca" href="/portal">Pequeños <span>Artistas</span></a>
+      <button class="boton fantasma" id="salir" style="min-height:40px;padding:6px 16px;font-size:0.9rem">Cerrar sesión</button>
+    </header>
+
+    <section class="hero" style="padding-top:8px">
+      <div class="kicker">🎉 Bienvenida al portal</div>
+      <h1 id="saludo">¡Empieza la aventura!</h1>
+      <p class="lead">30 días, 3 técnicas y un montón de dibujos para imprimir. Unos 15 minutos por día alcanzan.</p>
+    </section>
+
+    <section class="tarjeta" id="recomendacion" hidden>
+      <h3 id="rec-titulo"></h3>
+      <p id="rec-texto" style="margin:0"></p>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Las 3 técnicas</h2>
+      <div class="tecnicas">
+        <article class="tecnica">
+          <div class="num">1</div>
+          <h3>Formas mágicas</h3>
+          <p>Todo se dibuja con círculos, cuadrados y triángulos. Tu hijo aprende a "ver" las formas escondidas en animales, autos y casas.</p>
+        </article>
+        <article class="tecnica">
+          <div class="num">2</div>
+          <h3>Color y texturas</h3>
+          <p>Crayones, lápices y acuarela casera. Mezclas, degradés y texturas con objetos que ya tenés en casa.</p>
+        </article>
+        <article class="tecnica">
+          <div class="num">3</div>
+          <h3>Personajes e historias</h3>
+          <p>Caras, emociones y una mini historieta propia. De mirar historias en la tablet a inventar las suyas.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Tu plan de 30 días</h2>
+      <div class="semanas">
+        <div class="semana"><span class="dia">Días 1–7</span><div><strong>Formas mágicas.</strong> Un dibujo nuevo por día armado con 3 formas. Terminamos con un zoológico de formas.</div></div>
+        <div class="semana"><span class="dia">Días 8–14</span><div><strong>Color y texturas.</strong> Pintamos los dibujos de la semana 1 con una técnica distinta cada día.</div></div>
+        <div class="semana"><span class="dia">Días 15–21</span><div><strong>Personajes.</strong> Caras, emociones y un personaje propio con nombre y superpoder.</div></div>
+        <div class="semana"><span class="dia">Días 22–28</span><div><strong>Historias.</strong> Una historieta de 4 cuadros protagonizada por su personaje.</div></div>
+        <div class="semana"><span class="dia">Días 29–30</span><div><strong>Expo en casa.</strong> Elegimos sus 5 mejores obras y armamos una muestra para la familia.</div></div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Descargas imprimibles</h2>
+      <p>Imprimí en A4. Si no tenés impresora, se pueden calcar de la pantalla. 😉</p>
+      <div class="descargas">
+        <a class="descarga" href="/descargas/plan-30-dias.pdf" download>
+          <span>📅 Plan de 30 días<small>Calendario para pegar en la heladera</small></span><span>PDF ⬇</span>
+        </a>
+        <a class="descarga" href="/descargas/tecnica-1-formas-magicas.pdf" download>
+          <span>🔺 Técnica 1 · Formas mágicas<small>Láminas para dibujar con formas</small></span><span>PDF ⬇</span>
+        </a>
+        <a class="descarga" href="/descargas/tecnica-2-color-y-texturas.pdf" download>
+          <span>🌈 Técnica 2 · Color y texturas<small>Láminas para colorear</small></span><span>PDF ⬇</span>
+        </a>
+        <a class="descarga" href="/descargas/tecnica-3-personajes.pdf" download>
+          <span>🦸 Técnica 3 · Personajes e historias<small>Caras, emociones y plantilla de historieta</small></span><span>PDF ⬇</span>
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <footer class="pie">Pequeños Artistas · Material para uso familiar.</footer>
+
+  <script src="/auth.js"></script>
+  <script>
+    // Personalización no sensible. Si estás viendo esto, Netlify ya verificó el rol buyer.
+    const RECS = {
+      explorador: ["🌈 Para tu Explorador de colores", "Arranquen por la Técnica 2 (Color y texturas) y después vuelvan a la 1."],
+      constructor: ["🧱 Para tu Constructor de formas", "Sigan el plan en orden: la Técnica 1 (Formas mágicas) es perfecta para empezar."],
+      sonador: ["🦸 Para tu Soñador de historias", "Hagan un día de la Técnica 3 cada semana para mantener la motivación."],
+    };
+    let resultado = "";
+    try { resultado = localStorage.getItem("pa_resultado") || ""; } catch {}
+    if (RECS[resultado]) {
+      document.getElementById("rec-titulo").textContent = RECS[resultado][0];
+      document.getElementById("rec-texto").textContent = RECS[resultado][1];
+      document.getElementById("recomendacion").hidden = false;
+    }
+
+    window.PAAuth.currentUser().then((user) => {
+      const nombre = user?.name?.split(" ")[0];
+      if (nombre) document.getElementById("saludo").textContent = `¡Hola, ${nombre}! Empieza la aventura`;
+    });
+
+    document.getElementById("salir").onclick = async (e) => {
+      e.target.disabled = true;
+      await window.PAAuth.signOut().catch(() => {});
+      location.replace("/");
+    };
+  </script>
+</body>
+</html>

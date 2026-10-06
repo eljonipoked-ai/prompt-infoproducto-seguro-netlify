@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pequeños Artistas · 30 días, 3 técnicas</title>
+  <meta name="description" content="Un plan de 30 días con 3 técnicas de dibujo y más de 60 dibujos imprimibles para que tu hijo pida menos la tablet.">
+  <script>
+    // Google vuelve a la raíz con #access_token=...: lo derivamos al login para procesarlo.
+    if (/(access_token|error|confirmation_token|recovery_token|invite_token)=/.test(location.hash)) {
+      location.replace("/login.html" + location.hash);
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="contenedor">
+    <header class="barra">
+      <a class="marca" href="/">Pequeños <span>Artistas</span></a>
+      <a class="boton fantasma" href="/login.html" style="min-height:40px;padding:6px 16px;font-size:0.9rem">Ya compré</a>
+    </header>
+
+    <section class="hero" id="intro">
+      <div class="kicker">🎨 30 días · 3 técnicas</div>
+      <h1>Menos tablet, <em>más lápices</em>.</h1>
+      <p class="lead">Un plan simple para que tu hijo descubra el dibujo y cambie la pantalla por papel. Respondé 4 preguntas y descubrí qué tipo de pequeño artista tenés en casa.</p>
+      <ul class="chips">
+        <li>✏️ +60 dibujos imprimibles</li>
+        <li>🖍️ 3 técnicas paso a paso</li>
+        <li>📅 1 actividad por día</li>
+      </ul>
+      <button class="boton" id="empezar">Hacer el quiz (1 minuto)</button>
+    </section>
+
+    <section class="tarjeta" id="quiz" hidden aria-live="polite">
+      <div class="progreso" aria-hidden="true"><div id="barra"></div></div>
+      <p id="contador" style="font-weight:800;color:var(--tinta-suave);margin:0 0 4px"></p>
+      <h2 id="pregunta"></h2>
+      <div class="opciones" id="opciones"></div>
+    </section>
+
+    <section class="tarjeta resultado" id="resultado" hidden aria-live="polite">
+      <div class="avatar" id="res-emoji"></div>
+      <p style="font-weight:800;color:var(--tinta-suave);margin:0">Tu hijo es…</p>
+      <h2 id="res-titulo"></h2>
+      <p id="res-texto"></p>
+      <div class="aviso info" id="res-tecnica"></div>
+      <p class="precio">$18.990 <small>ARS · pago único</small></p>
+      <ul class="lista-check" style="text-align:left;max-width:420px;margin:16px auto">
+        <li>Plan de 30 días con una actividad corta por día</li>
+        <li>3 técnicas: formas mágicas, color y texturas, personajes e historias</li>
+        <li>+60 dibujos imprimibles para colorear y completar</li>
+        <li>Acceso con tu cuenta de Google, cuando quieras</li>
+      </ul>
+      <div class="acciones">
+        <a class="boton" href="/checkout.html">Quiero el plan de 30 días</a>
+        <button class="boton fantasma" id="repetir">Repetir quiz</button>
+      </div>
+    </section>
+  </div>
+
+  <footer class="pie">Pequeños Artistas · Versión de demostración: el pago es simulado.</footer>
+
+  <script>
+    const PREGUNTAS = [
+      {
+        q: "Cuando tu hijo agarra la tablet, ¿qué es lo que más le atrapa?",
+        o: [
+          ["🌈", "Juegos llenos de colores y efectos", "explorador"],
+          ["🧱", "Construir, armar o resolver cosas", "constructor"],
+          ["🦸", "Videos con personajes e historias", "sonador"],
+        ],
+      },
+      {
+        q: "Si le das una hoja en blanco, normalmente…",
+        o: [
+          ["🖍️", "Agarra todos los colores y pinta sin parar", "explorador"],
+          ["📐", "Dibuja casas, autos o robots con formas", "constructor"],
+          ["💭", "Te cuenta lo que está dibujando mientras lo hace", "sonador"],
+        ],
+      },
+      {
+        q: "¿Qué frase escuchás más en casa?",
+        o: [
+          ["✨", "“¡Mirá qué lindo me quedó!”", "explorador"],
+          ["🔧", "“¿Cómo se hace esto?”", "constructor"],
+          ["📖", "“¿Y después qué pasó?”", "sonador"],
+        ],
+      },
+      {
+        q: "¿Cuánto tiempo puede quedarse quieto con una actividad?",
+        o: [
+          ["⚡", "Poquito: necesita algo rápido y vistoso", "explorador"],
+          ["⏱️", "Un rato largo si tiene un objetivo claro", "constructor"],
+          ["🌙", "Mucho, si la actividad tiene una historia", "sonador"],
+        ],
+      },
+    ];
+
+    const RESULTADOS = {
+      explorador: {
+        emoji: "🌈", titulo: "Explorador de colores",
+        texto: "Le encantan los estímulos visuales. La clave es reemplazar los colores de la pantalla por colores que él mismo crea con sus manos.",
+        tecnica: "Te recomendamos empezar por la Técnica 2: Color y texturas.",
+      },
+      constructor: {
+        emoji: "🧱", titulo: "Constructor de formas",
+        texto: "Disfruta entender cómo funcionan las cosas. Dibujar a partir de formas simples le da ese mismo desafío, sin pantalla.",
+        tecnica: "Te recomendamos empezar por la Técnica 1: Formas mágicas.",
+      },
+      sonador: {
+        emoji: "🦸", titulo: "Soñador de historias",
+        texto: "Lo atrapan los personajes. Cuando aprende a crear los suyos, deja de consumir historias y empieza a inventarlas.",
+        tecnica: "Te recomendamos empezar por la Técnica 3: Personajes e historias.",
+      },
+    };
+
+    const $ = (id) => document.getElementById(id);
+    let paso = 0;
+    let puntos = {};
+
+    function mostrar(seccion) {
+      for (const id of ["intro", "quiz", "resultado"]) $(id).hidden = id !== seccion;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderPregunta() {
+      const p = PREGUNTAS[paso];
+      $("contador").textContent = `Pregunta ${paso + 1} de ${PREGUNTAS.length}`;
+      $("barra").style.width = `${(paso / PREGUNTAS.length) * 100}%`;
+      $("pregunta").textContent = p.q;
+      $("opciones").replaceChildren(...p.o.map(([emoji, texto, perfil]) => {
+        const b = document.createElement("button");
+        b.className = "opcion";
+        b.innerHTML = `<span class="emoji" aria-hidden="true">${emoji}</span>`;
+        b.append(texto);
+        b.onclick = () => responder(perfil);
+        return b;
+      }));
+    }
+
+    function responder(perfil) {
+      puntos[perfil] = (puntos[perfil] || 0) + 1;
+      paso += 1;
+      if (paso < PREGUNTAS.length) return renderPregunta();
+      const orden = ["sonador", "constructor", "explorador"];
+      const ganador = orden.reduce((a, b) => ((puntos[b] || 0) >= (puntos[a] || 0) ? b : a));
+      // Sólo personalización no sensible: no concede ningún acceso.
+      try { sessionStorage.setItem("pa_resultado", ganador); localStorage.setItem("pa_resultado", ganador); } catch {}
+      const r = RESULTADOS[ganador];
+      $("res-emoji").textContent = r.emoji;
+      $("res-titulo").textContent = r.titulo;
+      $("res-texto").textContent = r.texto;
+      $("res-tecnica").textContent = r.tecnica;
+      mostrar("resultado");
+    }
+
+    function empezar() {
+      paso = 0; puntos = {};
+      renderPregunta();
+      mostrar("quiz");
+    }
+
+    $("empezar").onclick = empezar;
+    $("repetir").onclick = empezar;
+  </script>
+</body>
+</html>

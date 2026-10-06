@@ -1,0 +1,7 @@
+node_modules/
+.netlify/
+.env
+.env.*
+public/auth.js
+.DS_Store
+deno.lock

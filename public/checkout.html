@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout DEMO · Pequeños Artistas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="contenedor">
+    <header class="barra">
+      <a class="marca" href="/">Pequeños <span>Artistas</span></a>
+      <span class="demo-badge">DEMO</span>
+    </header>
+
+    <section class="tarjeta">
+      <h1 style="font-size:clamp(1.7rem,6vw,2.4rem)">Último paso 🎨</h1>
+      <p id="saludo-resultado" hidden></p>
+      <div class="aviso demo">
+        <strong>Pago simulado (DEMO).</strong> Esta versión demuestra el circuito de acceso: no se cobra dinero ni se piden datos de tarjeta.
+      </div>
+
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+        <div>
+          <strong>Pequeños Artistas</strong><br>
+          <small style="color:var(--tinta-suave)">Plan de 30 días · 3 técnicas · +60 imprimibles</small>
+        </div>
+        <p class="precio">$18.990 <small>ARS</small></p>
+      </div>
+
+      <form id="form" novalidate>
+        <label for="nombre">Tu nombre</label>
+        <input type="text" id="nombre" name="name" autocomplete="name" required maxlength="80" placeholder="Ej: Laura">
+
+        <label for="email">Correo de Google con el que vas a entrar</label>
+        <input type="email" id="email" name="email" autocomplete="email" required placeholder="tu.correo@gmail.com">
+        <p style="font-size:0.9rem;color:var(--tinta-suave);margin-top:-8px">Usá el mismo correo que tu cuenta de Google: con él vas a abrir el portal.</p>
+
+        <div class="aviso error" id="error" hidden role="alert"></div>
+
+        <button class="boton ancho" type="submit" id="pagar">
+          <span id="pagar-texto">Simular pago de $18.990</span>
+          <span class="spinner" id="pagar-spinner" hidden></span>
+        </button>
+      </form>
+
+      <div id="exito" hidden>
+        <div class="aviso ok" role="status">✅ ¡Listo! Registramos tu compra DEMO.</div>
+        <p>Ahora entrá con Google usando <strong id="exito-email"></strong> para abrir tu portal.</p>
+        <a class="boton secundario ancho" href="/login.html">Continuar con Google</a>
+      </div>
+    </section>
+  </div>
+
+  <footer class="pie">Pequeños Artistas · Pago simulado con fines de demostración.</footer>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const PERFILES = { explorador: "Explorador de colores", constructor: "Constructor de formas", sonador: "Soñador de historias" };
+    let resultado = "";
+    try { resultado = sessionStorage.getItem("pa_resultado") || localStorage.getItem("pa_resultado") || ""; } catch {}
+    if (PERFILES[resultado]) {
+      $("saludo-resultado").hidden = false;
+      $("saludo-resultado").textContent = `Tu pequeño artista es un ${PERFILES[resultado]}. El portal ya va a tener su recomendación lista.`;
+    }
+
+    function setCargando(on) {
+      $("pagar").disabled = on;
+      $("pagar-spinner").hidden = !on;
+      $("pagar-texto").textContent = on ? "Registrando compra…" : "Simular pago de $18.990";
+    }
+
+    function mostrarError(msg) {
+      $("error").textContent = msg;
+      $("error").hidden = false;
+    }
+
+    $("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      $("error").hidden = true;
+      const name = $("nombre").value.trim();
+      const email = $("email").value.trim();
+      if (!name) return mostrarError("Escribí tu nombre.");
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return mostrarError("Revisá el correo: parece incompleto.");
+
+      setCargando(true);
+      try {
+        const res = await fetch("/.netlify/functions/register-demo-purchase", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name, email,
+            result: PERFILES[resultado] ? resultado : undefined,
+            product: "pequenos-artistas", price: 18990, currency: "ARS", status: "demo",
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok || data.status !== "active") {
+          throw new Error(data.error === "validation_failed" ? "Revisá los datos e intentá de nuevo." : "No pudimos registrar la compra. Probá otra vez en un momento.");
+        }
+        // Sólo para explicar una cuenta equivocada en el login. No concede acceso.
+        try { sessionStorage.setItem("pa_checkout_email", email.toLowerCase()); } catch {}
+        $("exito-email").textContent = email.toLowerCase();
+        $("form").hidden = true;
+        $("exito").hidden = false;
+      } catch (err) {
+        mostrarError(err.message || "No pudimos registrar la compra.");
+      } finally {
+        setCargando(false);
+      }
+    });
+  </script>
+</body>
+</html>

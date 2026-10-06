@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrar · Pequeños Artistas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="contenedor">
+    <header class="barra">
+      <a class="marca" href="/">Pequeños <span>Artistas</span></a>
+    </header>
+
+    <section class="tarjeta centro">
+      <div style="font-size:3.2rem;line-height:1">🖍️</div>
+      <h1 style="font-size:clamp(1.7rem,6vw,2.4rem)">Tu portal de artista</h1>
+
+      <div id="cargando" class="aviso info" role="status" style="display:flex;gap:10px;align-items:center;justify-content:center">
+        <span class="spinner oscuro"></span> Verificando tu sesión…
+      </div>
+
+      <div id="bloqueado" class="aviso info" hidden>Para abrir el portal necesitás entrar con la cuenta de Google con la que compraste.</div>
+
+      <div id="anonimo" hidden>
+        <p>Entrá con la cuenta de Google que usaste en la compra.</p>
+        <button class="boton ancho" id="google">Entrar con Google</button>
+      </div>
+
+      <div id="sin-compra" hidden>
+        <div class="aviso error" role="alert">
+          Entraste como <strong id="usuario-email"></strong>, pero no encontramos una compra para ese correo.
+        </div>
+        <p id="pista-cuenta" hidden></p>
+        <div class="acciones">
+          <a class="boton" href="/checkout.html">Ir al checkout</a>
+          <button class="boton fantasma" data-salir>Cambiar de cuenta</button>
+        </div>
+      </div>
+
+      <div id="comprador" hidden>
+        <div class="aviso ok" role="status">✅ ¡Compra verificada! Abriendo tu portal…</div>
+        <a class="boton secundario" href="/portal">Abrir portal</a>
+      </div>
+
+      <div id="error" class="aviso error" hidden role="alert"></div>
+    </section>
+  </div>
+
+  <footer class="pie">Pequeños Artistas · Tu acceso queda asociado a tu cuenta de Google.</footer>
+
+  <script src="/auth.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const vistas = ["cargando", "anonimo", "sin-compra", "comprador", "error"];
+    const mostrar = (id) => vistas.forEach((v) => ($(v).hidden = v !== id));
+
+    // Si Netlify nos sirvió esta página en lugar de /portal, el visitante no tenía permiso.
+    if (location.pathname !== "/login.html" && location.pathname !== "/login") $("bloqueado").hidden = false;
+
+    $("google").onclick = () => {
+      $("google").disabled = true;
+      window.PAAuth.startGoogle();
+    };
+
+    document.querySelectorAll("[data-salir]").forEach((b) => (b.onclick = async () => {
+      b.disabled = true;
+      await window.PAAuth.signOut().catch(() => {});
+      location.replace("/login.html");
+    }));
+
+    (async () => {
+      try {
+        const user = await window.PAAuth.completeCallback();
+        if (location.hash) history.replaceState(null, "", location.pathname);
+        if (!user) return mostrar("anonimo");
+
+        if (window.PAAuth.hasBuyerRole(user)) {
+          mostrar("comprador");
+          // Si ya estábamos en /portal* y Netlify igual nos mostró el login, la cookie es vieja: no hacemos bucle.
+          if (location.pathname === "/login.html" || location.pathname === "/login") {
+            setTimeout(() => location.replace("/portal"), 600);
+          }
+          return;
+        }
+
+        // Autenticado pero sin rol buyer: no se entrega el portal.
+        const email = (user.email || "").toLowerCase();
+        $("usuario-email").textContent = email || "una cuenta sin correo";
+        let checkoutEmail = "";
+        try { checkoutEmail = sessionStorage.getItem("pa_checkout_email") || ""; } catch {}
+        if (checkoutEmail && checkoutEmail !== email) {
+          $("pista-cuenta").hidden = false;
+          $("pista-cuenta").textContent = `En el checkout usaste ${checkoutEmail}. Cerrá sesión y entrá con esa cuenta de Google.`;
+        }
+        mostrar("sin-compra");
+      } catch (err) {
+        $("error").textContent = "No pudimos completar el ingreso con Google. Probá de nuevo.";
+        mostrar("error");
+        $("anonimo").hidden = false;
+      }
+    })();
+  </script>
+</body>
+</html>
